@@ -17,19 +17,16 @@
     "@": "dist"
   },
   "devDependencies": {
+    "tsx": "^4.19.2"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
     "@types/compression": "^1.7.5",
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.7",
-    "prisma": "^6.0.0",
-    "tsc-alias": "^1.8.10",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
-  },
-  "dependencies": {
-    "@prisma/client": "^6.0.0",
     "compression": "^1.7.5",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -38,9 +35,12 @@
     "express-winston": "^4.2.0",
     "helmet": "^8.0.0",
     "module-alias": "^2.2.3",
+    "prisma": "^6.0.0",
     "socket.io": "^4.8.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "tsc-alias": "^1.8.10",
+    "typescript": "^5.7.2",
     "winston": "^3.17.0",
     "zod": "^3.24.1"
   }
