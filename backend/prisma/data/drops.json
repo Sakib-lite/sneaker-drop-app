@@ -1,0 +1,72 @@
+[
+  {
+    "name": "Air Jordan 1 Retro High OG \"Chicago\"",
+    "description": "The iconic Chicago colorway returns in premium leather",
+    "price": 250.00,
+    "totalStock": 100,
+    "imageUrl": "https://images.unsplash.com/photo-1612902376937-d5f4f15b0e33?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Nike Dunk Low \"Panda\"",
+    "description": "Classic black and white colorway, instant classic",
+    "price": 120.00,
+    "totalStock": 150,
+    "imageUrl": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Adidas Yeezy Boost 350 V2 \"Zebra\"",
+    "description": "Kanye West collaboration with signature stripe pattern",
+    "price": 220.00,
+    "totalStock": 75,
+    "imageUrl": "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "New Balance 550 \"White Green\"",
+    "description": "Retro basketball silhouette making a comeback",
+    "price": 130.00,
+    "totalStock": 200,
+    "imageUrl": "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Air Jordan 4 Retro \"Military Black\"",
+    "description": "Premium nubuck construction with classic military detailing",
+    "price": 215.00,
+    "totalStock": 80,
+    "imageUrl": "https://images.unsplash.com/photo-1584735175097-719d848f8449?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Nike SB Dunk Low \"Travis Scott\"",
+    "description": "Limited collaboration with hip-hop artist Travis Scott",
+    "price": 350.00,
+    "totalStock": 50,
+    "imageUrl": "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Converse Chuck 70 High \"Parchment\"",
+    "description": "Elevated version of the classic Chuck Taylor",
+    "price": 85.00,
+    "totalStock": 300,
+    "imageUrl": "https://images.unsplash.com/photo-1514989940723-e8e51635b782?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Air Jordan 11 Retro \"Bred\"",
+    "description": "Patent leather icon worn by MJ in championship runs",
+    "price": 230.00,
+    "totalStock": 60,
+    "imageUrl": "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Nike Air Max 1 \"Patta Waves\"",
+    "description": "Amsterdam collaboration with exclusive wave pattern",
+    "price": 180.00,
+    "totalStock": 90,
+    "imageUrl": "https://images.unsplash.com/photo-1543508282-6319a3e2621f?w=400&h=400&fit=crop"
+  },
+  {
+    "name": "Salomon XT-6 \"Silver Metallic\"",
+    "description": "Trail running heritage meets street style",
+    "price": 195.00,
+    "totalStock": 120,
+    "imageUrl": "https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=400&h=400&fit=crop"
+  }
+]
