@@ -132,6 +132,7 @@ export const getUserReservations = async (req: Request, res: Response, next: Nex
 export const cancelReservation = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const reservationId = Array.isArray(id) ? id[0] : id;
     const { userId } = req.body;
 
     if (!userId) {
@@ -139,7 +140,7 @@ export const cancelReservation = async (req: Request, res: Response, next: NextF
     }
 
     const reservation = await prisma.reservation.findUnique({
-      where: { id }
+      where: { id: reservationId }
     });
 
     if (!reservation) {
@@ -156,7 +157,7 @@ export const cancelReservation = async (req: Request, res: Response, next: NextF
 
     await prisma.$transaction(async (tx) => {
       await tx.reservation.update({
-        where: { id },
+        where: { id: reservationId },
         data: { isActive: false }
       });
 

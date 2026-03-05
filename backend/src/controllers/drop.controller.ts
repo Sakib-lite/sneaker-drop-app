@@ -51,7 +51,7 @@ export const createDrop = async (req: Request, res: Response, next: NextFunction
   }
 };
 
-export const getAllDrops = async (req: Request, res: Response, next: NextFunction) => {
+export const getAllDrops = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const drops = await prisma.drop.findMany({
       orderBy: {
@@ -102,9 +102,10 @@ export const getAllDrops = async (req: Request, res: Response, next: NextFunctio
 export const getDropById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const dropId = Array.isArray(id) ? id[0] : id;
 
     const drop = await prisma.drop.findUnique({
-      where: { id },
+      where: { id: dropId },
       include: {
         purchases: {
           take: 3,

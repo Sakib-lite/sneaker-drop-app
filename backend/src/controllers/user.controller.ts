@@ -47,9 +47,10 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const getUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const userId = Array.isArray(id) ? id[0] : id;
 
     const user = await prisma.user.findUnique({
-      where: { id },
+      where: { id: userId },
       include: {
         _count: {
           select: {
