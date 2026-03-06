@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+// @ts-ignore
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -14,6 +15,9 @@ const sneakerDrops = JSON.parse(readFileSync(dropsDataPath, 'utf-8'));
 async function main() {
   console.log('🌱 Starting seed...');
 
+  await prisma.user.deleteMany({});
+  await prisma.purchase.deleteMany({});
+  await prisma.reservation.deleteMany({});
   await prisma.drop.deleteMany({});
   console.log('✨ Cleared existing drops');
 

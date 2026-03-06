@@ -1,354 +1,255 @@
-# 🔥 Sneaker Drop - Limited Edition Real-Time Inventory System
+# Sneaker Drop App
 
-A high-performance, real-time inventory management system for limited edition sneaker drops with atomic reservation handling and WebSocket-powered live updates.
+A real-time limited edition sneaker drop application with inventory management, reservations, and live stock updates.
 
-## 🎯 Project Overview
+## Features
 
-This application simulates a competitive sneaker drop environment where:
-- Multiple users compete for limited stock items
-- Stock updates happen **instantly** across all browser tabs via WebSocket
-- Users can temporarily **reserve** items for 60 seconds
-- **Atomic operations** prevent overselling (race condition handling)
-- Auto-expiration returns stock to pool if users don't complete purchase
+- Real-time stock updates using WebSocket (Socket.IO)
+- Atomic reservation system with race condition prevention
+- 60-second reservation timeout with automatic cleanup
+- Real-time purchase notifications
+- Recent purchasers display
+- Swagger API documentation
+- Rate limiting for reservation endpoints
 
-## 🏗️ Architecture
+## Tech Stack
 
-### Tech Stack
+### Backend
+- Node.js + Express
+- TypeScript
+- PostgreSQL (Neon)
+- Prisma ORM
+- Socket.IO for WebSockets
+- Swagger/OpenAPI documentation
 
-**Frontend:**
-- React 19 with Vite
-- Material-UI (MUI) for beautiful UI
-- Context API for state management
-- Socket.IO Client for real-time updates
-- Axios for HTTP requests
+### Frontend
+- React + TypeScript
+- Vite
+- Material-UI (MUI)
+- Axios for API calls
+- Socket.IO client
 
-**Backend:**
-- Node.js + Express + TypeScript
-- PostgreSQL with Prisma ORM
-- Socket.IO for WebSocket communication
-- Swagger for API documentation
-- Winston for logging
-
-**Database:**
-- PostgreSQL (running in Docker)
-- Prisma migrations for schema management
-
-## 🚀 Quick Start
+## Getting Started
 
 ### Prerequisites
 
-- Node.js v18+
-- Docker (for PostgreSQL)
+- Node.js (v18 or higher)
+- PostgreSQL database (or Neon account)
 - npm or yarn
 
-### 1. Start PostgreSQL Database
+### Installation
 
-```bash
-docker run --name postgres-lite \
-  -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=postgres123 \
-  -e POSTGRES_DB=myappdb \
-  -p 5432:5432 \
-  -d postgres:16-alpine
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Sakib-lite/sneaker-drop-app
+   cd sneaker-drop-app
+   ```
 
-### 2. Backend Setup
+2. **Setup Backend**
 
-```bash
-cd backend
+   ```bash
+   cd backend
+   npm install
+   
+   cp .env.example .env
+   npm run seed 
+   
+   
+   ```
 
-# Install dependencies
-npm install
+   Your `.env` should look like:
+   ```env
+   NODE_ENV=development
+   PORT=5001
+   SERVER_URL=http://localhost:5001
+   CLIENT_URL=http://localhost:5173
+   DATABASE_URL=postgresql://user:password@host:5432/database
+   RESERVATION_TIMEOUT_SECONDS=60
+   FRONTEND_URL=http://localhost:5173
+   ```
 
-# Run migrations
-npm run migrate:dev -- --name init
+   ```bash
+   # Run database migrations
+   npm run migrate
+   
+   # Generate Prisma client
+   npm run generate
+   
+   # Seed the database with sample data
+   npm run seed
+   
+   # Start development server
+   npm run dev
+   ```
 
-# Start development server
-npm run dev
-```
+   Backend will run on `http://localhost:5001`
 
-Backend runs on: `http://localhost:5001`
-API Docs: `http://localhost:5001/api-docs`
+3. **Setup Frontend**
 
-### 3. Frontend Setup
+   ```bash
+   cd frontend
+   
+   # Install dependencies
+   npm install
+   
+   # Copy environment variables
+   cp .env.example .env
+   
+   # Edit .env if needed (default values should work)
+   ```
 
-```bash
-cd frontend
+   Your `.env` should look like:
+   ```env
+   VITE_API_URL=http://localhost:5001
+   VITE_WS_URL=http://localhost:5001
+   ```
 
-# Install dependencies
-npm install
+   ```bash
+   # Start development server
+   npm run dev
+   ```
 
-# Start development server
-npm run dev
-```
+   Frontend will run on `http://localhost:5173`
 
-Frontend runs on: `http://localhost:3000`
+4. **Access the application**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5001
+   - API Documentation: http://localhost:5001/api-docs
 
-## 📊 Database Schema
-
-### Users Table
-```sql
-- id (UUID, Primary Key)
-- username (String, Unique)
-- email (String, Unique, Nullable)
-- createdAt, updatedAt
-```
-
-### Drops Table (Sneaker Products)
-```sql
-- id (UUID, Primary Key)
-- name (String)
-- description (String, Nullable)
-- price (Decimal)
-- totalStock (Integer) - Never changes
-- availableStock (Integer) - Decreases with reservations
-- imageUrl (String, Nullable)
-- startTime (DateTime)
-- createdAt, updatedAt
-```
-
-### Reservations Table
-```sql
-- id (UUID, Primary Key)
-- userId (Foreign Key → users.id)
-- dropId (Foreign Key → drops.id)
-- expiresAt (DateTime) - createdAt + 60 seconds
-- isActive (Boolean)
-- createdAt, updatedAt
-
-Indexes: (userId, dropId), (expiresAt), (isActive)
-```
-
-### Purchases Table
-```sql
-- id (UUID, Primary Key)
-- userId (Foreign Key → users.id)
-- dropId (Foreign Key → drops.id)
-- quantity (Integer, Default: 1)
-- price (Decimal) - Snapshot at purchase time
-- createdAt
-
-Indexes: (dropId, createdAt DESC)
-```
-
-## 🔄 Stock Flow & Lifecycle
-
-### Reservation Created
-```
-availableStock: 100 → 99 (atomic decrement)
-Reservation expires in 60 seconds
-WebSocket broadcast: STOCK_UPDATE
-```
-
-### Reservation Expires (Background Job)
-```
-availableStock: 99 → 100 (stock returned)
-Reservation marked as inactive
-WebSocket broadcast: STOCK_UPDATE
-```
-
-### Purchase Completed
-```
-availableStock: 99 (no change - already decremented)
-Reservation marked as inactive
-Purchase record created
-WebSocket broadcast: PURCHASE_COMPLETED
-```
-
-## 🔒 Concurrency & Race Condition Handling
-
-### The Problem
-```
-100 users click "Reserve" simultaneously for the last 1 item
-Only 1 should succeed, 99 should get "Out of stock"
-```
-
-### The Solution: Atomic Database Operations
-
-
-**Why This Works:**
-- PostgreSQL row-level locking
-- `updateMany` with condition is atomic
-- Only 1 transaction succeeds when stock = 1
-- Transaction isolation prevents dirty reads
-
-## ⏱️ 60-Second Expiration Mechanism
-
-### Implementation: Background Cleanup Job
-
-## 📡 Real-Time WebSocket Events
-
-### Events Emitted by Server
-
-
-## 🎨 Frontend Features
-
-### Beautiful MUI Design
-- Responsive grid layout for drop cards
-- Real-time stock progress bars
-- Color-coded stock levels (green → yellow → red)
-- Loading states on all buttons
-- Toast notifications for user feedback
-
-### Key Components
-
-**Dashboard**
-- Displays all active drops
-- Auto-refreshes every 30 seconds
-- Shows user info and active reservations count
-
-**DropCard**
-- Product image, name, description
-- Live stock count with progress bar
-- Top 3 recent purchasers with avatars
-- Reserve button with loading state
-- 60-second countdown timer for active reservations
-- Complete Purchase button
-
-**LoginDialog**
-- Simple username entry
-- Validates against backend
-- Stores user ID in localStorage
-
-### Real-Time Features
-- Stock updates across all tabs instantly
-- Countdown timer updates every second
-- Recent purchasers update in real-time
-- Auto-refresh reservations every 5 seconds
-
-## 🔌 API Endpoints
+## API Endpoints
 
 ### Users
-- `POST /api/users` - Create user
-- `GET /api/users/:id` - Get user details
+- `POST /api/users` - Create a new user
+- `GET /api/users/:id` - Get user by ID
 
 ### Drops
-- `POST /api/drops` - Create new drop
-- `GET /api/drops` - Get all drops with top 3 purchasers
-- `GET /api/drops/:id` - Get single drop
+- `POST /api/drops` - Create a new drop
+- `GET /api/drops` - Get all drops
+- `GET /api/drops/:id` - Get drop by ID
 
 ### Reservations
-- `POST /api/reservations` - Create reservation (atomic, rate-limited)
-- `GET /api/reservations/my-reservations?userId=:id` - Get user reservations
-- `DELETE /api/reservations/:id` - Cancel reservation
+- `POST /api/reservations` - Create a reservation (rate limited)
+- `GET /api/reservations/my-reservations` - Get user's active reservations
+- `DELETE /api/reservations/:id` - Cancel a reservation
 
 ### Purchases
-- `POST /api/purchases` - Complete purchase (requires active reservation)
+- `POST /api/purchases` - Complete a purchase
 
-### System
-- `GET /health` - Health check
-- `GET /api-docs` - Swagger documentation
+## WebSocket Events
 
-## 📝 Environment Variables
+### Client → Server
+- `connection` - Client connects
+- `disconnect` - Client disconnects
 
-### Backend (.env)
+### Server → Client
+- `STOCK_UPDATE` - Stock level changed
+- `PURCHASE_COMPLETED` - Purchase was completed
+- `NEW_DROP` - New drop added
+
+## Database Schema
+
+### User
+- id (UUID)
+- username (unique)
+- email (unique, optional)
+- createdAt
+- updatedAt
+
+### Drop
+- id (UUID)
+- name
+- description
+- price
+- totalStock
+- availableStock
+- imageUrl
+- startTime
+- createdAt
+- updatedAt
+
+### Reservation
+- id (UUID)
+- userId (FK → User)
+- dropId (FK → Drop)
+- expiresAt
+- isActive
+- createdAt
+- updatedAt
+
+### Purchase
+- id (UUID)
+- userId (FK → User)
+- dropId (FK → Drop)
+- reservationId (FK → Reservation, optional)
+- price
+- createdAt
+- updatedAt
+
+## Available Scripts
+
+### Backend
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Build for production
+- `npm start` - Start production server
+- `npm run migrate` - Run database migrations
+- `npm run migrate:dev` - Run migrations in development
+- `npm run generate` - Generate Prisma client
+- `npm run seed` - Seed database with sample data
+- `npm run studio` - Open Prisma Studio
+
+### Frontend
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run lint` - Run ESLint
+
+## Deployment
+
+### Backend
+The backend requires persistent server support for WebSocket connections and background jobs. **Not compatible with Vercel serverless functions.**
+
+Recommended platforms:
+- **Railway** (recommended)
+- Render
+- Fly.io
+- AWS EC2/ECS
+- DigitalOcean
+
+### Frontend
+The frontend can be deployed to any static hosting service:
+- Vercel
+- Netlify
+- Cloudflare Pages
+
+## Environment Variables
+
+### Backend Production
 ```env
-NODE_ENV=development
-PORT=5001
-DATABASE_URL=postgresql://postgres:postgres123@localhost:5432/myappdb
-FRONTEND_URL=http://localhost:3000
-APP_NAME=Sneaker Drop API
+NODE_ENV=production
+DATABASE_URL=<your-production-database-url>
+SERVER_URL=<your-backend-url>
+CLIENT_URL=<your-frontend-url>
+FRONTEND_URL=<your-frontend-url>
 RESERVATION_TIMEOUT_SECONDS=60
 ```
 
-### Frontend (.env)
+### Frontend Production
 ```env
-VITE_API_URL=http://localhost:5001
-VITE_WS_URL=http://localhost:5001
+VITE_API_URL=<your-backend-url>
+VITE_WS_URL=<your-backend-url>
 ```
 
-## 🧪 Testing the Application
+## Architecture
 
-### Test Scenario 1: Basic Flow
-1. Open `http://localhost:3000`
-2. Enter username to login
-3. Click "Reserve Now" on any drop
-4. Watch stock decrease instantly
-5. See 60-second countdown timer
-6. Click "Complete Purchase" before timer expires
-7. See your username in recent purchasers
+### Race Condition Prevention
+The app uses Prisma's `$transaction` with `updateMany` to prevent race conditions when multiple users try to reserve the same item simultaneously.
 
-### Test Scenario 2: Real-Time Sync
-1. Open two browser windows side-by-side
-2. Login with different usernames
-3. Reserve the same item from one window
-4. Watch stock update instantly in both windows
-5. Wait for reservation to expire
-6. Watch stock return to pool in both windows
+### Reservation System
+- Reservations expire after 60 seconds
+- Background cleanup service runs every 10 seconds
+- Expired reservations automatically restore stock
 
-### Test Scenario 3: Race Condition
-1. Create a drop with `totalStock: 1`
-2. Open multiple tabs
-3. Click reserve simultaneously
-4. Only one should succeed
-5. Others get "Out of stock" error
-
-## 🚢 Deployment Recommendations
-
-### Vercel (Frontend + Backend)
-```bash
-# Frontend
-vercel --prod
-
-# Backend in /api directory
-# Configure vercel.json for API routes
-```
-
-### Neon (PostgreSQL Database)
-- Create database at neon.tech
-- Copy connection string
-- Update DATABASE_URL in environment variables
-
-### Environment Variables in Vercel
-```
-DATABASE_URL=postgresql://user:pass@neon.tech/db
-FRONTEND_URL=https://your-app.vercel.app
-NODE_ENV=production
-```
-
-## 📈 Performance Optimizations
-
-- Database indexes on frequently queried fields
-- Connection pooling with Prisma
-- Rate limiting (10 reservations/min per IP)
-- Compression middleware
-- Efficient WebSocket broadcasts
-- Background job runs every 10s (tunable)
-
-## 🔐 Security Features
-
-- Helmet.js for security headers
-- CORS configured for frontend origin
-- Input validation with Zod
-- SQL injection prevention (Prisma ORM)
-- Rate limiting on critical endpoints
-- UUID instead of sequential IDs
-
-## 📚 Project Structure
-
-```
-sneaker-drop-app/
-├── backend/
-│   ├── prisma/
-│   │   ├── schema.prisma
-│   │   └── migrations/
-│   ├── src/
-│   │   ├── config/
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   ├── docs/
-│   │   ├── app.ts
-│   │   └── index.ts
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── services/
-│   │   ├── store/
-│   │   ├── theme/
-│   │   └── App.jsx
-│   └── package.json
-└── README.md
-```
+### Real-time Updates
+- Socket.IO broadcasts stock changes to all connected clients
+- Recent purchasers are displayed in real-time
+- Stock counter updates immediately
